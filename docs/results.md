@@ -151,7 +151,7 @@ snort -V
 | ICMP Ping Detection | `1000001` | ✅ Successful |
 | TCP SYN Scan Detection | `1000002` | ✅ Successful |
 | SSH Service Monitoring | `1000002` | ✅ Observed |
-| Dedicated SSH Brute Force Detection | `1000003` | 🔧 Future Enhancement |
+| Dedicated SSH Brute Force Detection | `1000003` | ✅ Successful |
 
 # 10. Security Analysis
 
