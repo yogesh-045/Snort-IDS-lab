@@ -156,48 +156,82 @@ rather than claiming that every detected SYN packet is a confirmed port scan.
 
 For a production IDS implementation, thresholding and event correlation can be added to detect repeated scanning behavior more accurately.
 
-# 3. SSH Service Monitoring
+# 3. SSH Brute-Force Detection
+
 ## Objective
 
-Monitor SSH traffic directed toward the Metasploitable 2 SSH service.
+Detect repeated SSH connection attempts against the Metasploitable 2 SSH service.
 
-SSH operates on:
-```
-TCP/22
-```
-### Service Verification
+SSH operates on TCP port 22.
 
-The SSH service was verified using:
-```text
-nmap -p 22 192.168.56.101
-```
-The target reported:
-```text
-22/tcp open ssh
-```
-## SSH Traffic
+Target:
 
-SSH connection attempts generate TCP traffic toward:
 ```text
 192.168.56.101:22
 ```
-For example:
+Source:
 ```text
-192.168.56.102:xxxxx -> 192.168.56.101:22
+192.168.56.102
 ```
-## Detection Consideration
-
-The generic TCP SYN detection rule can also trigger when a normal SSH connection is initiated because SSH uses TCP connection establishment.
-
-For example:
+### Custom Rule
 ```text
-[**] [1:1000002:1] "Possible TCP SYN Port Scan" [**]
-{TCP} 192.168.56.102:38972 -> 192.168.56.101:22
+alert tcp any any -> 192.168.56.101 22 (flags:S; msg:"Possible SSH Brute Force Activity"; sid:1000003; rev:1; detection_filter:track by_src,count 5,seconds 60;)
 ```
-This alert indicates a TCP SYN packet targeting SSH port 22.
+### Rule Logic
 
-It should not automatically be interpreted as a confirmed SSH brute-force attack.
+The rule tracks TCP SYN packets directed toward SSH port 22.
 
+An alert is generated when the same source produces at least five connection attempts within 60 seconds.
+
+| Parameter | Meaning |
+|---|---|
+| `tcp` | TCP traffic |
+| `192.168.56.101` | Metasploitable 2 |
+| `22` | SSH port |
+| `flags:S` | TCP SYN |
+| `track by_src` | Track attempts by source IP |
+| `count 5` | Five attempts |
+| `seconds 60` | Within 60 seconds |
+| `sid:1000003` | SSH detection rule |
+
+## Testing
+
+Repeated SSH authentication attempts were generated from Kali Linux against the isolated Metasploitable 2 lab target.
+
+The testing was performed only inside the authorized virtual laboratory.
+
+Expected Alert
+```text
+[**] [1:1000003:1] "Possible SSH Brute Force Activity" [**]
+{TCP} 192.168.56.102:xxxxx -> 192.168.56.101:22
+```
+## Analysis
+
+The Snort alert indicates repeated SSH connection attempts from the same source.
+
+Because SSH authentication is encrypted, the Snort packet rule does not directly identify whether an individual password was incorrect.
+
+Therefore, SSH authentication logs should be correlated with the Snort alert to confirm repeated failed login attempts.
+
+## Detection Flow
+```text
+Repeated SSH Attempts
+        |
+        v
+TCP SYN packets to port 22
+        |
+        v
+Snort SID 1000003
+        |
+        v
+Possible SSH Brute Force Activity
+        |
+        v
+Correlate with SSH authentication logs
+        |
+        v
+Security Investigation
+```
 # 4. Alert Analysis
 
 Snort alerts provide useful information to a security analyst.
