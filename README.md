@@ -461,9 +461,7 @@ The project can be extended with more advanced detection capabilities.
 snort-ids-lab/
 │
 ├── README.md
-│
-├── config/
-│   └── snort.conf.example
+│   
 │
 ├── docs/
 │   ├── setup.md
