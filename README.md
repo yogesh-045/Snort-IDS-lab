@@ -301,7 +301,7 @@ For a production-quality implementation, SSH brute-force detection should use ad
 | ICMP Traffic | `ping` | ICMP Ping Detected | ✅ Detected |
 | TCP SYN Scan | `nmap -sS` | Possible TCP SYN Port Scan | ✅ Detected |
 | SSH Service | `nmap -p 22` | SSH service identified | ✅ Verified |
-| SSH Brute Force | Repeated SSH attempts | Requires dedicated threshold/correlation rule | 🔧 Enhancement |
+| SSH Brute Force | Repeated SSH attempts | Requires dedicated threshold/correlation rule | ✅ Detected |
 
 ## 📸 Evidence
 
